@@ -1,4 +1,4 @@
-package music
+package impl
 
 // 通用的类型信息
 type Objector struct {
@@ -17,7 +17,7 @@ type Objector struct {
 }
 
 type LocalMusic struct {
-	MusicList []Objector
+	MusicList []Objector `json:"music_list"`
 }
 
 type RemoteMusic struct {
