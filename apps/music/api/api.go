@@ -7,22 +7,34 @@ import (
 	"path/filepath"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/rs/zerolog"
 	"github.com/xmtlzzz/vMusic/apps/music/impl"
 )
 
-func WebService() *restful.WebService {
+type MusicApiHandler struct {
+	log zerolog.Logger
+}
+
+func NewMusicApiHandler() *MusicApiHandler {
+	return &MusicApiHandler{
+		log: zerolog.New(os.Stdout),
+	}
+}
+
+func (m *MusicApiHandler) WebService() *restful.WebService {
 	ws := new(restful.WebService)
-	ws.Path("/local").
+	ws.Path("/music/local").
 		Consumes(restful.MIME_JSON).
 		Produces(restful.MIME_JSON)
 
-	ws.Route(ws.GET("/{path}").To(GetFromLocalPath).
+	ws.Route(ws.GET("/{path}").To(m.GetFromLocalPath).
 		Doc("get from local path").
 		Writes(impl.LocalMusic{}.MusicList).
 		Returns(200, "OK", impl.LocalMusic{}.MusicList).
 		Returns(404, "music not found", nil))
 
-	ws.Route(ws.POST("/upload").To(SaveFileToLocal).
+	ws.Route(ws.POST("/upload").To(m.SaveFileToLocal).
+		// 设置接收类型可以是multipart/form-data
 		Consumes("multipart/form-data").
 		Doc("upload music files to local path").
 		Returns(200, "OK", map[string]interface{}{}).
@@ -32,13 +44,13 @@ func WebService() *restful.WebService {
 	return ws
 }
 
-func GetFromLocalPath(request *restful.Request, response *restful.Response) {
+func (m *MusicApiHandler) GetFromLocalPath(request *restful.Request, response *restful.Response) {
 	log.Println("request local path to find music list")
 	lp := request.PathParameter("path")
 	if lp == "" {
 		lp = "C:\\Users\\Administrator\\Desktop\\code\\Go\\vMusic\\test"
 	}
-	lm := impl.GetFromLocalPath(lp)
+	lm := impl.NewMusicObj().GetFromLocalPath(lp)
 	if lm.MusicList == nil {
 		log.Printf("could't find any music in local path: %v", lp)
 		response.WriteErrorString(404, "music not found")
@@ -52,7 +64,7 @@ func GetFromLocalPath(request *restful.Request, response *restful.Response) {
 	}
 }
 
-func SaveFileToLocal(request *restful.Request, response *restful.Response) {
+func (m *MusicApiHandler) SaveFileToLocal(request *restful.Request, response *restful.Response) {
 	// 解析表单，最大32MB
 	err := request.Request.ParseMultipartForm(32 << 20)
 	if err != nil {

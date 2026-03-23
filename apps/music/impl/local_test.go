@@ -14,7 +14,7 @@ import (
 )
 
 func TestGetFromLocalPath(t *testing.T) {
-	res := impl.GetFromLocalPath("C:\\Users\\Administrator\\Desktop\\code\\Go\\vMusic\\test")
+	res := impl.NewMusicObj().GetFromLocalPath("C:\\Users\\Administrator\\Desktop\\code\\Go\\vMusic\\test")
 	if res == nil {
 		t.Fatal("未搜到对应的music")
 	}
@@ -55,7 +55,7 @@ func TestSaveFileToLocal(t *testing.T) {
 
 	// 创建 restful 容器并添加路由
 	container := restful.NewContainer()
-	container.Add(api.WebService())
+	container.Add(api.NewMusicApiHandler().WebService())
 	container.ServeHTTP(recorder, req)
 
 	// 检查响应状态

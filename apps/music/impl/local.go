@@ -6,7 +6,14 @@ import (
 	"strings"
 )
 
-func GetFromLocalPath(localPath string) *LocalMusic {
+type MusicObj struct {
+}
+
+func NewMusicObj() *MusicObj {
+	return &MusicObj{}
+}
+
+func (m *MusicObj) GetFromLocalPath(localPath string) *LocalMusic {
 	lm := NewLocalMusic()
 	pE, err := os.ReadDir(localPath)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	ws := api.WebService()
+	ws := api.NewMusicApiHandler().WebService()
 	restful.Add(ws)
 	log.Println("Server starting on :8000")
 	err := http.ListenAndServe(":8000", nil)
