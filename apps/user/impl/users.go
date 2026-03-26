@@ -30,6 +30,9 @@ func (u *UserHandler) CreateUser(ctx context.Context, request *CreateUserRequest
 		Mail:      request.Mail,
 		Telephone: request.Telephone,
 		Password:  request.Password}); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return errors.New("user is created")
+		}
 		return err
 	}
 	return nil

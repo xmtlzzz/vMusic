@@ -17,7 +17,7 @@ type MusicApiHandler struct {
 
 func NewMusicApiHandler() *MusicApiHandler {
 	return &MusicApiHandler{
-		log: zerolog.New(os.Stdout),
+		log: zerolog.New(os.Stdout).With().Timestamp().Logger(),
 	}
 }
 
@@ -25,18 +25,20 @@ func (m *MusicApiHandler) WebService() *restful.WebService {
 	ws := new(restful.WebService)
 	ws.Path("/music/local").
 		Consumes(restful.MIME_JSON).
-		Produces(restful.MIME_JSON)
+		Produces(restful.MIME_JSON).
+		Doc("Local music APIs")
 
 	ws.Route(ws.GET("/{path}").To(m.GetFromLocalPath).
 		Doc("get from local path").
+		Param(ws.PathParameter("path", "local directory path").DataType("string")).
 		Writes(impl.LocalMusic{}.MusicList).
 		Returns(200, "OK", impl.LocalMusic{}.MusicList).
 		Returns(404, "music not found", nil))
 
 	ws.Route(ws.POST("/upload").To(m.SaveFileToLocal).
-		// 设置接收类型可以是multipart/form-data
 		Consumes("multipart/form-data").
 		Doc("upload music files to local path").
+		Param(ws.MultiPartFormParameter("files", "music files to upload").DataType("file").AllowMultiple(true)).
 		Returns(200, "OK", map[string]interface{}{}).
 		Returns(400, "bad request", nil).
 		Returns(500, "internal server error", nil))
@@ -58,17 +60,16 @@ func (m *MusicApiHandler) GetFromLocalPath(request *restful.Request, response *r
 	}
 	err := response.WriteEntity(lm.MusicList)
 	if err != nil {
-		log.Printf("http返回错误: %v", err)
+		log.Printf("http response error: %v", err)
 		response.WriteErrorString(500, "internal server error")
 		return
 	}
 }
 
 func (m *MusicApiHandler) SaveFileToLocal(request *restful.Request, response *restful.Response) {
-	// 解析表单，最大32MB
 	err := request.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
-		log.Printf("解析表单失败: %v", err)
+		log.Printf("failed to parse multipart form: %v", err)
 		response.WriteErrorString(400, "failed to parse form")
 		return
 	}
@@ -85,13 +86,13 @@ func (m *MusicApiHandler) SaveFileToLocal(request *restful.Request, response *re
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
-			log.Printf("打开文件失败 %s: %v", fileHeader.Filename, err)
+			log.Printf("failed to open file %s: %v", fileHeader.Filename, err)
 			continue
 		}
 
 		dst, err := os.Create(filepath.Join(savePath, fileHeader.Filename))
 		if err != nil {
-			log.Printf("创建文件失败 %s: %v", fileHeader.Filename, err)
+			log.Printf("failed to create file %s: %v", fileHeader.Filename, err)
 			file.Close()
 			continue
 		}
@@ -100,7 +101,7 @@ func (m *MusicApiHandler) SaveFileToLocal(request *restful.Request, response *re
 		dst.Close()
 
 		if err != nil {
-			log.Printf("保存文件失败 %s: %v", fileHeader.Filename, err)
+			log.Printf("failed to save file %s: %v", fileHeader.Filename, err)
 			continue
 		}
 		savedCount++
@@ -110,7 +111,7 @@ func (m *MusicApiHandler) SaveFileToLocal(request *restful.Request, response *re
 		return
 	}
 	response.WriteEntity(map[string]interface{}{
-		"message": "保存成功",
+		"message": "save success",
 		"saved":   savedCount,
 		"total":   len(files),
 	})

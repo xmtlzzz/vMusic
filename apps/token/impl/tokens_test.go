@@ -10,7 +10,8 @@ import (
 func TestTokenHandler_RegistryToken(t *testing.T) {
 	tr := impl.NewRegistryTokenRequest()
 	tr.Username = "sz"
-	tr.Email = "246542922@qq.com"
+	tr.Password = "123456"
+	tr.RefUserId = 1
 	tk, err := impl.NewTokenHandler().RegistryToken(context.Background(), tr)
 	if err != nil {
 		t.Fatal(err)

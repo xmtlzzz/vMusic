@@ -12,7 +12,7 @@ type Token struct {
 	// 用户id
 	RefUserId int `json:"ref_user_id" gorm:"column:ref_user_id;unique;index"`
 	// 颁发的Access token，token要唯一
-	AccessToken string `json:"access_token" gorm:"column:access_token;unique;index"`
+	AccessToken string `json:"access_token" gorm:"column:access_token;index"`
 	// 颁发时间，不能为nil
 	IssueAt time.Time `json:"issue_at" gorm:"column:issue_at"`
 	// 指针，因为token第一次颁发没有过期可以为nil
@@ -31,13 +31,21 @@ func NewToken() *Token {
 
 type RegistryTokenRequest struct {
 	Username  string               `json:"username"`
-	Email     string               `json:"email"`
-	Telephone string               `json:"telephone"`
+	Password  string               `json:"password"`
+	RefUserId int                  `json:"ref_user_id"`
 	Claims    jwt.RegisteredClaims `json:"claims"`
 }
 
 func NewRegistryTokenRequest() *RegistryTokenRequest {
 	return &RegistryTokenRequest{}
+}
+
+type QueryUserByTokenRequest struct {
+	AccessToken string `json:"access_token"`
+}
+
+func NewQueryUserByTokenRequest() *QueryUserByTokenRequest {
+	return &QueryUserByTokenRequest{}
 }
 
 type DeleteTokenRequest struct {
