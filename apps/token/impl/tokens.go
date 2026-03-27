@@ -75,8 +75,21 @@ func (t *TokenHandler) RegistryToken(ctx context.Context, request *RegistryToken
 }
 
 func (t *TokenHandler) DeleteToken(ctx context.Context, request *DeleteTokenRequest) error {
-	//TODO implement me
-	panic("implement me")
+	user, err := t.QueryUserByAccessToken(ctx, &QueryUserByTokenRequest{AccessToken: request.AccessToken})
+	if err != nil {
+		return err
+	}
+	if user.Username != request.Username {
+		return errors.New("user does not match token")
+	}
+	subQuery := t.DB.WithContext(ctx).
+		Select("userid").
+		Where("username = ?", request.Username).
+		Limit(1).Model(&user_impl.User{})
+	if err := t.DB.WithContext(ctx).Where("ref_user_id = (?)", subQuery).Delete(&Token{}).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func IssueToken(refUserID int, token string) *Token {

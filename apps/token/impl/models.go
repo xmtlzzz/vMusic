@@ -49,7 +49,8 @@ func NewQueryUserByTokenRequest() *QueryUserByTokenRequest {
 }
 
 type DeleteTokenRequest struct {
-	Username string `json:"username"`
+	Username    string `json:"username"`
+	AccessToken string `json:"access_token"`
 }
 
 func NewDeleteTokenRequest() *DeleteTokenRequest {
