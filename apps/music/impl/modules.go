@@ -2,6 +2,8 @@ package impl
 
 // 通用的类型信息
 type Objector struct {
+	// 音乐唯一标识
+	ID string `json:"id"`
 	// 名称
 	MusicName string `json:"music_name" toml:"music_name"`
 	// 作者
@@ -14,9 +16,23 @@ type Objector struct {
 	IsCollection bool `json:"is_collection" toml:"is_collection"`
 	// 获取到该音乐的路径
 	Path string `json:"path" toml:"path"`
+	// 原始文件名
+	FileName string `json:"file_name"`
+	// 音频格式
+	Format string `json:"format"`
+	// 前端可直接播放的音频地址
+	AudioURL string `json:"audio_url"`
 }
 
 type LocalMusic struct {
+	LibraryPath string     `json:"library_path"`
+	MusicList   []Objector `json:"music_list"`
+}
+
+type UploadResult struct {
+	Message   string     `json:"message"`
+	Saved     int        `json:"saved"`
+	Total     int        `json:"total"`
 	MusicList []Objector `json:"music_list"`
 }
 

@@ -22,10 +22,14 @@ type TokenHandler struct {
 }
 
 func NewTokenHandler() *TokenHandler {
-	return &TokenHandler{
+	handler := &TokenHandler{
 		Log: zerolog.New(os.Stdout),
 		DB:  utils.NewDBConnector(),
 	}
+	if err := handler.DB.AutoMigrate(&Token{}); err != nil {
+		handler.Log.Error().Err(err).Msg("failed to migrate token schema")
+	}
+	return handler
 }
 
 var _ TokenInt = (*TokenHandler)(nil)
@@ -93,10 +97,12 @@ func (t *TokenHandler) DeleteToken(ctx context.Context, request *DeleteTokenRequ
 }
 
 func IssueToken(refUserID int, token string) *Token {
+	expireAt := time.Now().Add(24 * time.Hour)
 	return &Token{
-		RefUserId:   refUserID,
-		AccessToken: token,
-		IssueAt:     time.Now(),
+		RefUserId:           refUserID,
+		AccessToken:         token,
+		IssueAt:             time.Now(),
+		AccessTokenExpireAt: &expireAt,
 	}
 }
 

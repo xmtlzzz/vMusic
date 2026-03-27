@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	log.Println("Server starting on :8080")
 	log.Println("Swagger UI: http://localhost:8080/swagger/")
 	log.Println("OpenAPI JSON: http://localhost:8080/apidocs.json/")

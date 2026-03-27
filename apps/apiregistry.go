@@ -15,4 +15,5 @@ func init() {
 	restful.Add(tokenWs)
 	restful.Add(userWs)
 	registerSwagger()
+	registerPlayerUI()
 }

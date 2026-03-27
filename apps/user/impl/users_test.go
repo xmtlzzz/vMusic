@@ -9,10 +9,10 @@ import (
 
 func TestCreateUser(t *testing.T) {
 	user := impl.NewCreateUserRequest()
-	user.Username = "sz"
-	user.Telephone = "13136325596"
-	user.Mail = "2465429244@qq.com"
-	user.Password = "123456"
+	user.UserInfo.Username = "sz"
+	user.UserInfo.Telephone = "13136325596"
+	user.UserInfo.Mail = "2465429244@qq.com"
+	user.UserInfo.Password = "123456"
 	if err := impl.NewUserHandler().CreateUser(context.Background(), user); err != nil {
 		t.Fatal(err)
 	}
